@@ -1,60 +1,96 @@
 import random
 
-w=20
-h=10
+W = 20
+H = 20
 
-w=w+1
-h=h+1
+W = W + 1
+H = H + 1
 
 def show(arr):
-    for i in range(1,h):
-        for j in range(1,w):
+    for i in range(1, H):
+        for j in range(1,W):
             if arr[i][j]:
                 print '\33['+str(30+arr[i][j])+'m#',
             else:
                 print '\33[0m0',
         print('')
+    print ''
 
-def min(a,b):
-    if a<b:
+def min(a, b):
+    if a < b:
         return a
     return b
 
-def max(a,b):
-    if a>b:
+def max(a, b):
+    if a > b:
         return a
     return b
 
 def gen_random(arr):
-    for i in range(1,h):
-        for j in range(1,w):
-            arr[i][j]=int(random.random()*4)
+    for i in range(1, H):
+        for j in range(1, W):
+            arr[i][j] = int(random.random() * 4)
 
+max_square_width = 0
 def gen_max_square(arr):
-    left=[([0]*w) for i in range(0,h)]
-    top=[([0]*w) for i in range(0,h)]
-    max_square=[([0]*w) for i in range(0,h)]
+    left = [([0] * W) for i in range(0, H)]
+    top = [([0] * W) for i in range(0, H)]
+    max_square = [([0] * W) for i in range(0,H)]
 
-    for i in range(1,h):
-        for j in range(1,w):
+    global max_square_width
+    for i in range(1, H):
+        for j in range(1, W):
             if arr[i][j]:
-                left[i][j]=left[i][j-1]+1
-                top[i][j]=top[i-1][j]+1
-                max_square[i][j]=min(max_square[i-1][j-1]+1,min(left[i][j],top[i][j]))
+                left[i][j] = left[i][j - 1] + 1
+                top[i][j] = top[i - 1][j] + 1
+                max_square[i][j] = min(max_square[i - 1][j - 1] + 1,min(left[i][j], top[i][j]))
+                max_square_width = max(max_square_width, max_square[i][j]);
     return max_square
 
-m=[([0]*w) for i in range(0,h)]
+m=[([0] * W) for i in range(0, H)]
 gen_random(m)
 
+max_rect_width = 0
+max_rect_height = 0
+max_rect_area = 0
+max_rect = [([0] * W) for i in range(0, H)]
+
 def gen_max_rect(arr):
-    max_rect=[([0]*w) for i in range(0,h)]
-    for i in range(h,0,-1):
-        for j in range(w,0,-1):
-            if arr[i][j]:
-                max_rect[i][j]=9
-    return max_rect
+    global max_rect_area
+    global max_rect_width
+    global max_rect_height
+    global max_rect
+    for k in range(max_square_width, 1, -1):
+        max_ = 0
+        left = [([0] * W) for i in range(0, H)]
+        top = [([0] * W) for i in range(0, H)]
+        for i in range(1, H):
+            for j in range(1, W):
+                if arr[i][j] >= k :
+                    left[i][j] = left[i][j - 1] + 1
+                    top[i][j] = top[i - 1][j] + 1
+                    area = (max(left[i][j], top[i][j]) + k - 1) * k
+                    if area > max_rect_area :
+                        max_rect_area = area
+                        if left[i][j] > top[i][j]:
+                            max_rect_width = left[i][j] + k - 1
+                            max_rect_height = k
+                        else:
+                            max_rect_width = k
+                            max_rect_height = top[i][j] + k - 1
+                        max_rect = [([0] * W) for __i in range(0, H)]
+                        for _i in range(i - max_rect_height + 1, i+1):
+                            for _j in range(j - max_rect_width + 1, j+1):
+                                max_rect[_i][_j]=6
+                        max_rect[i][j] = 4
+
+        #show(left)
+        #show(top)
+        print '---------------' + str(k)
 
 max_square=gen_max_square(m)
 show(max_square)
-print ''
-show(gen_max_rect(max_square))
+gen_max_rect(max_square)
+print max_rect_width
+print max_rect_height
+show(max_rect)
