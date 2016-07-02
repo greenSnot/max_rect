@@ -47,19 +47,14 @@ def gen_max_square(arr):
                 max_square_width = max(max_square_width, max_square[i][j]);
     return max_square
 
-m=[([0] * W) for i in range(0, H)]
-gen_random(m)
-
-max_rect_width = 0
-max_rect_height = 0
-max_rect_area = 0
-max_rect = [([0] * W) for i in range(0, H)]
-
 def gen_max_rect(arr):
+    max_square = gen_max_square(arr)
+    show(max_square)
+    arr = max_square
     global max_rect_area
     global max_rect_width
     global max_rect_height
-    global max_rect
+    max_rect = [([0] * W) for i in range(0, H)]
     for k in range(max_square_width, 1, -1):
         max_ = 0
         left = [([0] * W) for i in range(0, H)]
@@ -87,10 +82,15 @@ def gen_max_rect(arr):
         #show(left)
         #show(top)
         print '---------------' + str(k)
+    return max_rect
 
-max_square=gen_max_square(m)
-show(max_square)
-gen_max_rect(max_square)
+random_arr = [([0] * W) for i in range(0, H)]
+gen_random(random_arr)
+
+max_rect_width = 0
+max_rect_height = 0
+max_rect_area = 0
+
+show(gen_max_rect(random_arr))
 print max_rect_width
 print max_rect_height
-show(max_rect)
