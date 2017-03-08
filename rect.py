@@ -1,7 +1,8 @@
 import random
+import time
 
-W = 20
-H = 20
+W = 10
+H = 10
 
 W = W + 1
 H = H + 1
@@ -26,13 +27,17 @@ def max(a, b):
         return a
     return b
 
-def gen_random(arr):
+def make_random_arr(seed = False):
+    r = [([0] * W) for i in range(0, H)]
+    if seed:
+        random.seed(seed)
     for i in range(1, H):
         for j in range(1, W):
-            arr[i][j] = int(random.random() * 4)
+            r[i][j] = int(random.random() * 2)
+    return r
 
 max_square_width = 0
-def gen_max_square(arr):
+def get_max_square(arr):
     left = [([0] * W) for i in range(0, H)]
     top = [([0] * W) for i in range(0, H)]
     max_square = [([0] * W) for i in range(0,H)]
@@ -47,15 +52,14 @@ def gen_max_square(arr):
                 max_square_width = max(max_square_width, max_square[i][j]);
     return max_square
 
-def gen_max_rect(arr):
-    max_square = gen_max_square(arr)
-    show(max_square)
+def get_max_rect_method1(arr):
+    max_square = get_max_square(arr)
     arr = max_square
     global max_rect_area
     global max_rect_width
     global max_rect_height
     max_rect = [([0] * W) for i in range(0, H)]
-    for k in range(max_square_width, 1, -1):
+    for k in range(max_square_width, 0, -1):
         max_ = 0
         left = [([0] * W) for i in range(0, H)]
         top = [([0] * W) for i in range(0, H)]
@@ -79,18 +83,59 @@ def gen_max_rect(arr):
                                 max_rect[_i][_j]=6
                         max_rect[i][j] = 4
 
+        # debug
+
         #show(left)
         #show(top)
-        print '---------------' + str(k)
+        #print '---------------' + str(k)
     return max_rect
 
-random_arr = [([0] * W) for i in range(0, H)]
-gen_random(random_arr)
+def get_max_rect_method2(arr):
+    global max_rect_area
+    left = [([0] * W) for i in range(0, H)]
+    top = [([0] * W) for i in range(0, H)]
+    s = [([0] * W) for i in range(0,H)]
+    m = [([0] * W) for i in range(0,H)] # max area
+    def limit(queue, l, t, y, x):
+        min_y = y - t + 1
+        min_x = x - l + 1
+        suspects = [[min_y, x]]
+        if min_y != y or x != min_x :
+            suspects.append([y, min_x])
+        if queue:
+            for i in queue:
+                suspects.append([
+                    max(min_y, i[0]),
+                    max(min_x, i[1])
+                ])
+        return suspects
+
+    for i in range(1, H):
+        for j in range(1, W):
+            if arr[i][j]:
+                left[i][j] = left[i][j - 1] + 1
+                top[i][j] = top[i - 1][j] + 1
+                s[i][j] = limit(s[i - 1][j - 1], left[i][j], top[i][j], i, j)
+                for k in s[i][j]:
+                    m[i][j] = max(m[i][j], (i - k[0] + 1) * (j - k[1] + 1))
+                max_rect_area = max(m[i][j], max_rect_area);
+    return m
+
+random_arr = make_random_arr(654321)
 
 max_rect_width = 0
 max_rect_height = 0
 max_rect_area = 0
 
-show(gen_max_rect(random_arr))
-print max_rect_width
-print max_rect_height
+show(random_arr);
+
+now = time.time()
+result1 = get_max_rect_method1(random_arr)
+print 'method1:' + str(time.time() - now)
+
+now = time.time()
+result2 = get_max_rect_method2(random_arr)
+print 'method2:' + str(time.time() - now)
+
+show(result1)
+print max_rect_area
