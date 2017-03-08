@@ -52,7 +52,7 @@ def get_max_square(arr):
                 max_square_width = max(max_square_width, max_square[i][j]);
     return max_square
 
-def get_max_rect_method1(arr):
+def get_max_rect_method1(arr, debug = False):
     max_square = get_max_square(arr)
     arr = max_square
     global max_rect_area
@@ -77,37 +77,36 @@ def get_max_rect_method1(arr):
                         else:
                             max_rect_width = k
                             max_rect_height = top[i][j] + k - 1
-                        max_rect = [([0] * W) for __i in range(0, H)]
-                        for _i in range(i - max_rect_height + 1, i+1):
-                            for _j in range(j - max_rect_width + 1, j+1):
-                                max_rect[_i][_j]=6
-                        max_rect[i][j] = 4
-
-        # debug
-
-        #show(left)
-        #show(top)
-        #print '---------------' + str(k)
+                        if debug:
+                            max_rect = [([0] * W) for __i in range(0, H)]
+                            for _i in range(i - max_rect_height + 1, i+1):
+                                for _j in range(j - max_rect_width + 1, j+1):
+                                    max_rect[_i][_j]=6
+                            max_rect[i][j] = 4
     return max_rect
 
 def get_max_rect_method2(arr):
     global max_rect_area
     left = [([0] * W) for i in range(0, H)]
     top = [([0] * W) for i in range(0, H)]
-    s = [([0] * W) for i in range(0,H)]
     m = [([0] * W) for i in range(0,H)] # max area
+    s = [([0] * W) for i in range(0,H)]
+    for i in range(0, H):
+        s[i][0] = [];
+    for i in range(0, W):
+        s[0][i] = [];
     def limit(queue, l, t, y, x):
         min_y = y - t + 1
         min_x = x - l + 1
-        suspects = [[min_y, x]]
+        suspects = queue
+        for i in suspects:
+            if i[0] < min_y:
+                i[0] = min_y
+            if i[1] < min_x:
+                i[1] = min_x
+        suspects.append([min_y, x])
         if min_y != y or x != min_x :
             suspects.append([y, min_x])
-        if queue:
-            for i in queue:
-                suspects.append([
-                    max(min_y, i[0]),
-                    max(min_x, i[1])
-                ])
         return suspects
 
     for i in range(1, H):
@@ -119,9 +118,11 @@ def get_max_rect_method2(arr):
                 for k in s[i][j]:
                     m[i][j] = max(m[i][j], (i - k[0] + 1) * (j - k[1] + 1))
                 max_rect_area = max(m[i][j], max_rect_area);
+            else:
+                s[i][j] = []
     return m
 
-random_arr = make_random_arr(654321)
+random_arr = make_random_arr()
 
 max_rect_width = 0
 max_rect_height = 0
@@ -132,10 +133,11 @@ show(random_arr);
 now = time.time()
 result1 = get_max_rect_method1(random_arr)
 print 'method1:' + str(time.time() - now)
+print max_rect_area
 
 now = time.time()
 result2 = get_max_rect_method2(random_arr)
 print 'method2:' + str(time.time() - now)
 
-show(result1)
+show(result2)
 print max_rect_area
